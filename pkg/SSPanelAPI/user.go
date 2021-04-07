@@ -39,7 +39,7 @@ func getUser(node *SspController) (userList *[]structures.UserInfo, err error) {
 		return nil, err
 	}
 	if rtn.Get("ret").MustInt() != 1 {
-		return nil, errors.New(fmt.Sprintf("Server error or node not found"))
+		return nil, errors.New(fmt.Sprintf("Server error - %s", rtn.Get("data").MustString()))
 	}
 
 	numOfUsers := len(rtn.Get("data").MustArray())
@@ -57,7 +57,7 @@ func getUser(node *SspController) (userList *[]structures.UserInfo, err error) {
 
 		userSL := uint32(rtn.Get("data").GetIndex(u).Get("node_speedlimit").MustInt())
 		// The minimal value decide SpeedLimit
-		if userSL < node.NodeInfo.SpeedLimit {
+		if userSL > 0 && userSL < node.NodeInfo.SpeedLimit {
 			user.SpeedLimit = userSL
 		} else if node.NodeInfo.SpeedLimit > 0 {
 			user.SpeedLimit = node.NodeInfo.SpeedLimit

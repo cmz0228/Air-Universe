@@ -54,7 +54,7 @@ func getNodeInfo(node *SspController, closeTLS bool) (err error) {
 	}
 	// ret not equal to 1 means sspanel caused an error or node not fond.
 	if rtn.Get("ret").MustInt() != 1 {
-		return errors.New(fmt.Sprintf("Server error or node not found or key error"))
+		return errors.New(fmt.Sprintf("Server error - %s", rtn.Get("data").MustString()))
 	}
 
 	node.NodeInfo.RawInfo = rtn.Get("data").Get("server").MustString()
@@ -93,10 +93,11 @@ host	(?<=host=).*?(?=\|)|(?<=host=).*
 */
 func parseVmessRawInfo(node *structures.NodeInfo, closeTLS bool) (err error) {
 	reBasicInfos, _ := regexp.Compile("(^|(?<=;))([^;]*)(?=;)", 1)
-	rePath, _ := regexp.Compile("(?<=path=).*?(?=\\|)|(?<=path=).*", 1)
+	rePath, _ := regexp.Compile("(?<=path=).*?(?=\\||\\?)|(?<=path=).*", 1)
 	reHost, _ := regexp.Compile("(?<=host=).*?(?=\\|)|(?<=host=).*", 1)
 	reInsidePort, _ := regexp.Compile("(?<=inside_port=).*?(?=\\|)|(?<=inside_port=).*", 1)
 	reRelay, _ := regexp.Compile("(?<=relay=).*?(?=\\|)|(?<=relay=)", 1)
+	reVless, _ := regexp.Compile("(?<=enable_vless=).*?(?=\\|)|(?<=enable_vless=)", 1)
 
 	basicInfos, _ := reBasicInfos.FindStringMatch(node.RawInfo)
 	var basicInfoArray []string
@@ -108,6 +109,8 @@ func parseVmessRawInfo(node *structures.NodeInfo, closeTLS bool) (err error) {
 	mHost, _ := reHost.FindStringMatch(node.RawInfo)
 	mRelay, _ := reRelay.FindStringMatch(node.RawInfo)
 	mInsidePort, _ := reInsidePort.FindStringMatch(node.RawInfo)
+	mVless, _ := reVless.FindStringMatch(node.RawInfo)
+
 	//insidePort := mInsidePort
 	if len(basicInfoArray) == 5 {
 		node.Url = basicInfoArray[0]
@@ -125,6 +128,8 @@ func parseVmessRawInfo(node *structures.NodeInfo, closeTLS bool) (err error) {
 				node.TransportMode = "tcp"
 			case "ws":
 				node.TransportMode = "ws"
+			case "kcp":
+				node.TransportMode = "kcp"
 			case "tls":
 				if closeTLS == false {
 					node.EnableTLS = true
@@ -147,6 +152,9 @@ func parseVmessRawInfo(node *structures.NodeInfo, closeTLS bool) (err error) {
 	}
 	if mHost != nil {
 		node.Host = mHost.String()
+	}
+	if mVless != nil {
+		node.Protocol = "vless"
 	}
 
 	return

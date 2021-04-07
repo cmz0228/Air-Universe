@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	VERSION = "0.5.1"
+	VERSION = "0.7.1"
 )
 
 type WaitGroupWrapper struct {
@@ -39,7 +39,6 @@ func init() {
 		_, _ = fmt.Fprintf(os.Stdout, "Air-Universe %s\n", VERSION)
 		os.Exit(0)
 	}
-
 	if configPath != "" {
 		_, err := ParseBaseConfig(&configPath)
 		if err != nil {
@@ -59,6 +58,16 @@ func init() {
 		case "panic":
 			log.SetLevel(log.PanicLevel)
 
+		}
+
+		if baseCfg.Log.Access != "" {
+			file, err := os.OpenFile(baseCfg.Log.Access, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
+			if err == nil {
+				log.Infof("Log file will save at %s", baseCfg.Log.Access)
+				log.SetOutput(file)
+			} else {
+				log.Warn("Failed to log to file, using default stderr")
+			}
 		}
 
 		err = checkCfg()
@@ -138,7 +147,7 @@ func nodeSync(idIndex uint32, w *WaitGroupWrapper) (err error) {
 			time.Sleep(time.Duration(baseCfg.Sync.FailDelay) * time.Second)
 		}
 
-		if baseCfg.Proxy.SpeedLimitLevel != nil && baseCfg.Proxy.Type == "v2ray" {
+		if baseCfg.Proxy.SpeedLimitLevel != nil {
 			err = SpeedLimitControl.AddLevel(usersNow, baseCfg.Proxy.SpeedLimitLevel)
 			if err != nil {
 				log.Warnf("NodeID: %v IDIndex %v - Failed to add level to users - %s", nodeID, idIndex, err)
@@ -152,6 +161,8 @@ func nodeSync(idIndex uint32, w *WaitGroupWrapper) (err error) {
 					err = proxyClient.AddInbound(panelClient.GetNowInfo())
 					if err != nil {
 						log.Warnf("NodeID: %v IDIndex %v - Failed to add inbound - %s", nodeID, idIndex, err)
+						// 第一次未成功先删除后添加
+						nodeBefore.Tag = "fff"
 					} else {
 						break
 					}
@@ -163,7 +174,7 @@ func nodeSync(idIndex uint32, w *WaitGroupWrapper) (err error) {
 					err = proxyClient.RemoveInbound(nodeBefore)
 					if err != nil {
 						log.Warnf("NodeID: %v IDIndex %v - Failed to remove inbound - %s", nodeID, idIndex, err)
-						continue
+						//continue
 					} else {
 						log.Debugf("NodeID: %v IDIndex %v - Successfully remove inbound", nodeID, idIndex)
 					}
@@ -174,7 +185,6 @@ func nodeSync(idIndex uint32, w *WaitGroupWrapper) (err error) {
 						break
 					}
 				}
-
 				time.Sleep(time.Duration(baseCfg.Sync.FailDelay) * time.Second)
 			}
 
@@ -211,11 +221,15 @@ func nodeSync(idIndex uint32, w *WaitGroupWrapper) (err error) {
 		usersTraffic, err = proxyClient.QueryUsersTraffic(usersNow)
 		if err != nil {
 			log.Warnf("NodeID: %v IDIndex %v - Failed to query users traffic - %s", nodeID, idIndex, err)
+		} else {
+			log.Debugf("NodeID: %v IDIndex %v - Quary user traffic success - %+v", nodeID, idIndex, *usersTraffic)
 		}
 
 		// Every query will reset traffic statics, post traffic data will loop until success
 		for {
-			err = panelClient.PostTraffic(usersTraffic)
+			if len(*usersTraffic) > 0 {
+				err = panelClient.PostTraffic(usersTraffic)
+			}
 			if err != nil {
 				log.Warnf("NodeID: %v IDIndex %v - Failed to post users traffic - %s", nodeID, idIndex, err)
 			} else {
@@ -229,11 +243,13 @@ func nodeSync(idIndex uint32, w *WaitGroupWrapper) (err error) {
 		}
 
 		loaData, err := SysLoad.GetSysLoad()
-		err = panelClient.PostSysLoad(loaData)
-		if err != nil {
-			log.Warnf("NodeID: %v IDIndex %v - Failed to post system load - %s", nodeID, idIndex, err)
-		} else {
-			log.Debugf("NodeID: %v IDIndex %v - Successfully post system load - %+v", nodeID, idIndex, *loaData)
+		if baseCfg.Panel.Type == "sspanel" {
+			err = panelClient.PostSysLoad(loaData)
+			if err != nil {
+				log.Warnf("NodeID: %v IDIndex %v - Failed to post system load - %s", nodeID, idIndex, err)
+			} else {
+				log.Debugf("NodeID: %v IDIndex %v - Successfully post system load - %+v", nodeID, idIndex, *loaData)
+			}
 		}
 
 		usersBefore = usersNow
@@ -275,7 +291,8 @@ func postUsersIP(w *WaitGroupWrapper) (err error) {
 func main() {
 	var wg *WaitGroupWrapper
 	wg = new(WaitGroupWrapper)
-
+	// delay 2 s to wait proxy-core start
+	time.Sleep(time.Duration(2) * time.Second)
 	for idIndex := 0; idIndex < len(baseCfg.Panel.NodeIDs); idIndex++ {
 		wg.Add(1)
 		go nodeSync(uint32(idIndex), wg)
@@ -283,7 +300,9 @@ func main() {
 		time.Sleep(time.Duration(1) * time.Second)
 	}
 	wg.Add(1)
-	go postUsersIP(wg)
+	if baseCfg.Panel.Type == "sspanel" {
+		go postUsersIP(wg)
+	}
 
 	// wait
 	wg.Wait()

@@ -2,6 +2,7 @@ package XrayAPI
 
 import (
 	"context"
+	"errors"
 	"github.com/crossfw/Air-Universe/pkg/structures"
 	"github.com/xtls/xray-core/app/proxyman"
 	"github.com/xtls/xray-core/app/proxyman/command"
@@ -14,6 +15,7 @@ import (
 	trojanInbound "github.com/xtls/xray-core/proxy/trojan"
 	vmessInbound "github.com/xtls/xray-core/proxy/vmess/inbound"
 	"github.com/xtls/xray-core/transport/internet"
+	"github.com/xtls/xray-core/transport/internet/kcp"
 	"github.com/xtls/xray-core/transport/internet/tcp"
 	"github.com/xtls/xray-core/transport/internet/tls"
 	"github.com/xtls/xray-core/transport/internet/websocket"
@@ -27,6 +29,21 @@ func addInbound(client command.HandlerServiceClient, node *structures.NodeInfo) 
 		securitySettings  []*serial.TypedMessage
 		proxySetting      *serial.TypedMessage
 	)
+
+	switch node.Protocol {
+	case "vmess":
+		proxySetting = serial.ToTypedMessage(&vmessInbound.Config{})
+	case "trojan":
+		proxySetting = serial.ToTypedMessage(&trojanInbound.ServerConfig{})
+	case "ss":
+		proxySetting = serial.ToTypedMessage(&ssInbound.ServerConfig{
+			Network: []net.Network{2, 3},
+		})
+	case "vless":
+		err = errors.New("unsupported to auto add VLESS inbounds")
+		return err
+	}
+
 	switch node.TransportMode {
 	case "ws":
 		protocolName = "websocket"
@@ -62,6 +79,14 @@ func addInbound(client command.HandlerServiceClient, node *structures.NodeInfo) 
 				}),
 			},
 		}
+	case "kcp":
+		protocolName = "mkcp"
+		transportSettings = []*internet.TransportConfig{
+			{
+				ProtocolName: protocolName,
+				Settings:     serial.ToTypedMessage(&kcp.Config{}),
+			},
+		}
 	}
 
 	if node.EnableTLS == true && node.Cert.CertPath != "" && node.Cert.KeyPath != "" {
@@ -92,21 +117,6 @@ func addInbound(client command.HandlerServiceClient, node *structures.NodeInfo) 
 		// Disable TLS
 		securityType = ""
 		securitySettings = nil
-	}
-
-	switch node.Protocol {
-	case "vmess":
-		proxySetting = serial.ToTypedMessage(&vmessInbound.Config{
-			Detour: &vmessInbound.DetourConfig{
-				To: "direct",
-			},
-		})
-	case "trojan":
-		proxySetting = serial.ToTypedMessage(&trojanInbound.ServerConfig{})
-	case "ss":
-		proxySetting = serial.ToTypedMessage(&ssInbound.ServerConfig{
-			Network: []net.Network{2, 3},
-		})
 	}
 
 	_, err = client.AddInbound(context.Background(), &command.AddInboundRequest{

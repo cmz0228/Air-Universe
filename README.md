@@ -17,17 +17,27 @@
 - 审计规则默认屏蔽BT和内网IP, 可自行添加, 不支持从面板拉取
 - 审计信息**不会**上报
 - [一键脚本快速安装](https://github.com/crossfw/Air-Universe/tree/master/docs/TurnKey_cn.md)
-
+- [Docker对接](https://github.com/crossfw/Air-Universe/tree/master/docs/Docker_cn.md)
 ## 文档
 - 配置文件
   - [English](https://github.com/crossfw/Air-Universe/tree/master/docs/Doc_en.md)
   - [中文](https://github.com/crossfw/Air-Universe/tree/master/docs/Doc_cn.md)
 - 一键脚本
   - [中文](https://github.com/crossfw/Air-Universe/tree/master/docs/TurnKey_cn.md)
+- Docker安装
+  - [中文](https://github.com/crossfw/Air-Universe/tree/master/docs/Docker_cn.md)
 - 手动安装
   - [中文](https://github.com/crossfw/Air-Universe/tree/master/docs/Install_cn.md)
-  
 
+## Thanks
+
+* [Project X](https://github.com/XTLS/)
+* [V2Fly](https://github.com/v2fly)
+* [XrayR](https://github.com/XrayR-project/XrayR)
+* [All stargazers](https://github.com/crossfw/Air-Universe/stargazers)
+
+## Licence
+ [GNU General Public License v3.0](https://github.com/crossfw/Air-Universe/blob/master/LICENSE)
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/crossfw/Air-Universe.svg)](https://starchart.cc/crossfw/Air-Universe)

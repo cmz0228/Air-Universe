@@ -1,6 +1,6 @@
 {
   "log": {
-    "access":"/var/log/au-v.log"
+    "access":"/var/log/au/xr.log"
   },
   "stats": {},
   "api": {
@@ -17,50 +17,50 @@
         "statsUserUplink": true
       },
       "1": {
-        "inboundSpeed": "0.2M",
-        "outboundSpeed": "0.2M",
+        "downlinkSpeed": "2M",
+        "uplinkSpeed": "2M",
         "statsUserDownlink": true,
         "statsUserUplink": true
       },
       "2": {
-        "inboundSpeed": "3M",
-        "outboundSpeed": "3M",
+        "downlinkSpeed": "10M",
+        "uplinkSpeed": "10M",
         "statsUserDownlink": true,
         "statsUserUplink": true
       },
       "3": {
-        "inboundSpeed": "7M",
-        "outboundSpeed": "7M",
+        "downlinkSpeed": "30M",
+        "uplinkSpeed": "30M",
         "statsUserDownlink": true,
         "statsUserUplink": true
       },
       "4": {
-        "inboundSpeed": "13M",
-        "outboundSpeed": "13M",
+        "downlinkSpeed": "60M",
+        "uplinkSpeed": "60M",
         "statsUserDownlink": true,
         "statsUserUplink": true
       },
       "5": {
-        "inboundSpeed": "19M",
-        "outboundSpeed": "19M",
+        "downlinkSpeed": "100M",
+        "uplinkSpeed": "100M",
         "statsUserDownlink": true,
         "statsUserUplink": true
       },
       "6": {
-        "inboundSpeed": "25M",
-        "outboundSpeed": "25M",
+        "downlinkSpeed": "150M",
+        "uplinkSpeed": "150M",
         "statsUserDownlink": true,
         "statsUserUplink": true
       },
       "7": {
-        "inboundSpeed": "38M",
-        "outboundSpeed": "38M",
+        "downlinkSpeed": "250M",
+        "uplinkSpeed": "250M",
         "statsUserDownlink": true,
         "statsUserUplink": true
       },
       "8": {
-        "inboundSpeed": "63M",
-        "outboundSpeed": "63M",
+        "downlinkSpeed": "400M",
+        "uplinkSpeed": "400M",
         "statsUserDownlink": true,
         "statsUserUplink": true
       }

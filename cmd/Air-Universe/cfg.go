@@ -13,26 +13,30 @@ var (
 	baseCfg = &structures.BaseConfig{
 		Log: structures.Log{
 			LogLevel: "info",
+			Access:   "",
 		},
 		Panel: structures.Panel{
 			Type: "sspanel",
 		},
 		Proxy: structures.Proxy{
-			Type:            "xray",
-			AlertID:         1,
-			AutoGenerate:    true,
-			InTags:          []string{"p0"},
-			APIAddress:      "127.0.0.1",
-			APIPort:         10085,
-			ForceCloseTLS:   false,
-			LogPath:         "./v2.log",
-			SpeedLimitLevel: []float32{0, 0.2, 3, 7, 13, 19, 25, 38, 63},
+			Type:          "xray",
+			AlertID:       1,
+			AutoGenerate:  true,
+			InTags:        []string{},
+			APIAddress:    "127.0.0.1",
+			APIPort:       10085,
+			ForceCloseTLS: false,
+			ConfigPath:    "/usr/local/etc/xray/config.json",
+			Cert: structures.Cert{
+				CertPath: "/usr/local/share/server.crt",
+				KeyPath:  "/usr/local/share/server.key",
+			},
 		},
 		Sync: structures.Sync{
 			Interval:       60,
 			FailDelay:      5,
 			Timeout:        5,
-			PostIPInterval: 300,
+			PostIPInterval: 90,
 		},
 	}
 )
