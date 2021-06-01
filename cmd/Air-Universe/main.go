@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	VERSION = "0.7.1"
+	VERSION = "0.8.4"
 )
 
 type WaitGroupWrapper struct {
@@ -162,7 +162,7 @@ func nodeSync(idIndex uint32, w *WaitGroupWrapper) (err error) {
 					if err != nil {
 						log.Warnf("NodeID: %v IDIndex %v - Failed to add inbound - %s", nodeID, idIndex, err)
 						// 第一次未成功先删除后添加
-						nodeBefore.Tag = "fff"
+						nodeBefore.Tag = panelClient.GetNowInfo().Tag
 					} else {
 						break
 					}
@@ -297,7 +297,7 @@ func main() {
 		wg.Add(1)
 		go nodeSync(uint32(idIndex), wg)
 		// 延迟执行，防止在多节点时面板和代理内核崩溃
-		time.Sleep(time.Duration(1) * time.Second)
+		time.Sleep(time.Duration(5) * time.Second)
 	}
 	wg.Add(1)
 	if baseCfg.Panel.Type == "sspanel" {

@@ -20,16 +20,16 @@ var (
 		},
 		Proxy: structures.Proxy{
 			Type:          "xray",
-			AlertID:       1,
+			AlterID:       1,
 			AutoGenerate:  true,
 			InTags:        []string{},
 			APIAddress:    "127.0.0.1",
 			APIPort:       10085,
+			LogPath:       "/var/log/au/xr.log",
 			ForceCloseTLS: false,
-			ConfigPath:    "/usr/local/etc/xray/config.json",
 			Cert: structures.Cert{
-				CertPath: "/usr/local/share/server.crt",
-				KeyPath:  "/usr/local/share/server.key",
+				CertPath: "/usr/local/share/au/server.crt",
+				KeyPath:  "/usr/local/share/au/server.key",
 			},
 		},
 		Sync: structures.Sync{

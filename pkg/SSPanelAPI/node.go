@@ -13,7 +13,7 @@ import (
 )
 
 /*
-[url, port, alertId, isTLS, transportMode]   (.*?)(?=;)
+[url, port, alterId, isTLS, transportMode]   (.*?)(?=;)
 path	(?<=path=).*(?=\|)|(?<=path=).*
 host	(?<=host=).*(?=\|)|(?<=host=).*
 */
@@ -33,7 +33,7 @@ func getNodeInfo(node *SspController, closeTLS bool) (err error) {
 		}
 	}()
 
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{Timeout: 40 * time.Second}
 	defer client.CloseIdleConnections()
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/mod_mu/nodes/%v/info?key=%s", node.URL, node.NodeInfo.Id, node.Key), nil)
 	if err != nil {
@@ -87,7 +87,7 @@ func getNodeInfo(node *SspController, closeTLS bool) (err error) {
 }
 
 /*
-[url, port, alertId, isTLS, transportMode]   (^|(?<=;))([^;]*)(?=;)
+[url, port, alterId, isTLS, transportMode]   (^|(?<=;))([^;]*)(?=;)
 path	(?<=path=).*?(?=\|)|(?<=path=).*
 host	(?<=host=).*?(?=\|)|(?<=host=).*
 */
@@ -119,7 +119,7 @@ func parseVmessRawInfo(node *structures.NodeInfo, closeTLS bool) (err error) {
 		} else {
 			node.ListenPort, _ = String2Uint32(mInsidePort.String())
 		}
-		node.AlertID, _ = String2Uint32(basicInfoArray[2])
+		node.AlterID, _ = String2Uint32(basicInfoArray[2])
 
 		node.EnableTLS = false
 		for _, transM := range []int{3, 4} {
@@ -130,6 +130,8 @@ func parseVmessRawInfo(node *structures.NodeInfo, closeTLS bool) (err error) {
 				node.TransportMode = "ws"
 			case "kcp":
 				node.TransportMode = "kcp"
+			case "http":
+				node.TransportMode = "http"
 			case "tls":
 				if closeTLS == false {
 					node.EnableTLS = true

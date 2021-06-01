@@ -1,18 +1,12 @@
 # TurnKey Install
-自动安装 Air-Universe + Xray
+Air-Universe 管理脚本(安装+拆卸+申请证书)
 ```shell
-wget -N --no-check-certificate --no-cache https://github.com/crossfw/Air-Universe/raw/master/scripts/xray_script/Install_server_with_xray.sh && bash Install_server_with_xray.sh
+bash <(curl -Ls https://raw.githubusercontent.com/crossfw/Air-Universe-install/master/AirU.sh)
 ```
-实验性限速脚本
+升级Xray
 ```shell
-wget -N --no-check-certificate --no-cache https://github.com/crossfw/Air-Universe/raw/master/scripts/v2ray_script/Install_server_with_v2ray.sh && bash Install_server_with_v2ray.sh
+bash -c "$(curl -L https://github.com/crossfw/Xray-install/raw/main/install-release.sh)" @ install
 ```
-
-- 仅适配[SSPanel-UIM](https://github.com/Anankke/SSPanel-Uim)
-- 使用Xray做Proxy-core。限速版本使用V2Ray
-- 自动创建入站规则。
-- 适配多入站，比如一个带ProxyProtocol的中转 和 一个直连入站，均采用面板节点ID， 流量分开统计。
-
 
 ## 详细说明
 首先需要在面板上添加节点
@@ -27,6 +21,8 @@ wget -N --no-check-certificate --no-cache https://github.com/crossfw/Air-Univers
 
 注意 证书务必使用 `fullchain.cer` 否则可能会导致无法连接问题。
 ### 需要输入的内容
+#### 安装
+选择安装 `Air-Universe` 脚本会自动安装 Xray 和 Air-Universe 的最新版本。
 ```shell
 ########Air-Universe config#######
 Enter node_ids, (eg 1,2,3): 1,2,1
@@ -38,8 +34,6 @@ Choose panel type:
   2. V2board
 Choose panel type: 2
 Enter nodes type, (eg vmess,ss): "vmess","vmess","ss"
-Enter nodes enable receive proxy protocol, (eg true, false) enter means all false:[false,true,false]
-
 
 ```
 - 节点ID列表, 不同id用英文逗号","分隔,最后一位不用加
@@ -47,7 +41,36 @@ Enter nodes enable receive proxy protocol, (eg true, false) enter means all fals
 - 面板密码
 - 选择面板类型（若选择 v2board 则需要输入一下两项）
 - 节点类型，请输入 "vmess", "trojan", "ss" 类型选项。 请和最开头的节点顺序一致。不要忘了加双引号。
-- 接收 proxy protocol 来获得真实IP 开关，true 或 false 请和最开头的节点顺序一致。直接回车表示关闭。
+
+#### 申请证书
+选择 `使用ACME获取SSL证书`, 证书续签为自动化过程.
+
+```shell
+1. http
+2. dns (only support cloudflare)"
+```
+- 第一种 http 方式无须配置 Cloudflare API Key, 使用本地 80 端口验证,请先把域名解析做好.
+- 第二种dns配置, 需要提前准备好 Cloudflare Global API Key 无须本机80端口.
+
+##### http 申请
+```shell
+1. web path
+2. nginx
+3. apache
+4. use 80 port"
+```
+- `web path` 如有建站应用占用 80 端口,可输入网站根目录获取 (不推荐)
+- `nginx` 如果 nginx 占用 80 端口, 建议使用该方法
+- `apache` 如果 apache 占用 80 端口, 建议使用该方法
+- `use 80 port` 没有任何应用占用 80 端口, 建议使用该方法
+
+##### dns 申请
+```shell
+Input your CloudFlare Email:
+Input your CloudFlare Global API Key:
+```
+输入Cloudflare 邮箱和 Global Key 即可
+获取 Cloudflare Global API Key 请前往 [此处](https://support.cloudflare.com/hc/zh-cn/articles/200167836-%E7%AE%A1%E7%90%86-API-%E4%BB%A4%E7%89%8C%E5%92%8C%E5%AF%86%E9%92%A5) 参考 `查看 API 秘钥` 章节
 
 
 ### 这个脚本会做什么
